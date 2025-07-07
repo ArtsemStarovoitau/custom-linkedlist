@@ -1,13 +1,29 @@
+# Compiled class files
+/bin/
+/build/
+
 # Gradle
-.gradle/
-build/
-
-# IDE files
-.idea/
+.gradle
+/gradle/wrapper/gradle-wrapper.jar
+!/gradle/wrapper/gradle-wrapper.jar
 *.iml
-*.ipr
-*.iws
-out/
-
-# Other
+.project
+.classpath
+.settings
+.metadata
+target/
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
 *.log
+/out/
+.idea/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
