@@ -7,7 +7,7 @@ public class CustomLinkedList<T> {
     private static class Node<T> {
         T item;
         Node<T> next;
-        Node<T> prev; // Указатель на предыдущий узел
+        Node<T> prev;
 
         Node(Node<T> prev, T element, Node<T> next) {
             this.item = element;
@@ -49,7 +49,6 @@ public class CustomLinkedList<T> {
         }
         size++;
     }
-
     public void add(int index, T el) {
         if (index < 0 || index > size) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
@@ -90,55 +89,41 @@ public class CustomLinkedList<T> {
 
     public T removeFirst() {
         if (head == null) throw new NoSuchElementException();
-        final T element = head.item;
-        final Node<T> next = head.next;
-        head.item = null;
-        head.next = null;
-        head = next;
-        if (next == null) {
-            tail = null;
-        } else {
-            next.prev = null;
-        }
-        size--;
-        return element;
+        return unlink(head);
     }
 
     public T removeLast() {
         if (tail == null) throw new NoSuchElementException();
-        final T element = tail.item;
-        final Node<T> prev = tail.prev;
-        tail.item = null;
-        tail.prev = null;
-        tail = prev;
-        if (prev == null) {
-            head = null;
-        } else {
-            prev.next = null;
-        }
-        size--;
-        return element;
+        return unlink(tail);
     }
 
     public T remove(int index) {
         if (index < 0 || index >= size) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
-        if (index == 0) return removeFirst();
-        if (index == size - 1) return removeLast();
+        return unlink(getNode(index));
+    }
+    
+    private T unlink(Node<T> x) {
+        final T element = x.item;
+        final Node<T> next = x.next;
+        final Node<T> prev = x.prev;
 
-        Node<T> toRemove = getNode(index);
-        T element = toRemove.item;
-        Node<T> pred = toRemove.prev;
-        Node<T> succ = toRemove.next;
+        if (prev == null) {
+            head = next;
+        } else {
+            prev.next = next;
+            x.prev = null;
+        }
 
-        pred.next = succ;
-        succ.prev = pred;
+        if (next == null) {
+            tail = prev;
+        } else {
+            next.prev = prev;
+            x.next = null;
+        }
 
-        toRemove.item = null;
-        toRemove.next = null;
-        toRemove.prev = null;
-
+        x.item = null;
         size--;
         return element;
     }

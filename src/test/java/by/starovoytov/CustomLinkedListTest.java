@@ -11,10 +11,13 @@ import static org.junit.jupiter.api.Assertions.*;
 class CustomLinkedListTest {
 
     private CustomLinkedList<Integer> list;
+    private CustomLinkedList<Integer> listWithNulls;
+
 
     @BeforeEach
     void setUp() {
         list = new CustomLinkedList<>();
+        listWithNulls = new CustomLinkedList<>();
     }
 
     @Test
@@ -146,6 +149,8 @@ class CustomLinkedListTest {
         list.addFirst(10);
         list.removeLast();
         assertEquals(0, list.size());
+        assertThrows(NoSuchElementException.class, () -> list.getLast());
+        assertThrows(NoSuchElementException.class, () -> list.getFirst());
     }
 
     @Test
@@ -191,5 +196,47 @@ class CustomLinkedListTest {
         assertEquals(30, removed);
         assertEquals(2, list.size());
         assertEquals(20, list.getLast());
+    }
+
+
+    @Test
+    @DisplayName("Should correctly handle null elements")
+    void shouldCorrectlyHandleNullElements() {
+        listWithNulls.addFirst(null);
+        assertEquals(1, listWithNulls.size());
+        assertNull(listWithNulls.getFirst());
+        assertNull(listWithNulls.getLast());
+
+        listWithNulls.addLast(10); 
+        assertEquals(2, listWithNulls.size());
+        assertNull(listWithNulls.get(0));
+        assertEquals(10, listWithNulls.get(1));
+
+        listWithNulls.add(1, null); 
+        assertEquals(3, listWithNulls.size());
+        assertNull(listWithNulls.get(1));
+
+        assertNull(listWithNulls.remove(0)); 
+        assertEquals(2, listWithNulls.size());
+        assertEquals(10, listWithNulls.getLast());
+    }
+
+    @Test
+    @DisplayName("Get/Remove should work correctly on a larger list (testing optimization)")
+    void getAndRemoveShouldWorkCorrectlyOnLargerList() {
+        for (int i = 0; i < 30; i++) {
+            list.addLast(i);
+        }
+        assertEquals(30, list.size());
+
+        assertEquals(5, list.get(5));
+
+        assertEquals(25, list.get(25));
+
+        Integer removed = list.remove(25);
+        assertEquals(25, removed);
+        assertEquals(29, list.size());
+        assertEquals(29, list.getLast()); 
+        assertEquals(24, list.get(24)); 
     }
 }
