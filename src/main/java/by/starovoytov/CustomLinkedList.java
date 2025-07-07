@@ -7,10 +7,12 @@ public class CustomLinkedList<T> {
     private static class Node<T> {
         T item;
         Node<T> next;
+        Node<T> prev; // Указатель на предыдущий узел
 
-        Node(T element, Node<T> next) {
+        Node(Node<T> prev, T element, Node<T> next) {
             this.item = element;
             this.next = next;
+            this.prev = prev;
         }
     }
 
@@ -26,17 +28,19 @@ public class CustomLinkedList<T> {
 
     public void addFirst(T el) {
         final Node<T> h = head;
-        final Node<T> newNode = new Node<>(el, h);
+        final Node<T> newNode = new Node<>(null, el, h);
         head = newNode;
         if (h == null) {
             tail = newNode;
+        } else {
+            h.prev = newNode;
         }
         size++;
     }
 
     public void addLast(T el) {
         final Node<T> t = tail;
-        final Node<T> newNode = new Node<>(el, null);
+        final Node<T> newNode = new Node<>(t, el, null);
         tail = newNode;
         if (t == null) {
             head = newNode;
@@ -50,14 +54,19 @@ public class CustomLinkedList<T> {
         if (index < 0 || index > size) {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
         }
-        if (index == 0) {
-            addFirst(el);
-        } else if (index == size) {
+
+        if (index == size) {
             addLast(el);
         } else {
-            Node<T> pred = getNode(index - 1);
-            Node<T> newNode = new Node<>(el, pred.next);
-            pred.next = newNode;
+            Node<T> succ = getNode(index);
+            Node<T> pred = succ.prev;
+            final Node<T> newNode = new Node<>(pred, el, succ);
+            succ.prev = newNode;
+            if (pred == null) {
+                head = newNode;
+            } else {
+                pred.next = newNode;
+            }
             size++;
         }
     }
@@ -88,6 +97,8 @@ public class CustomLinkedList<T> {
         head = next;
         if (next == null) {
             tail = null;
+        } else {
+            next.prev = null;
         }
         size--;
         return element;
@@ -96,13 +107,14 @@ public class CustomLinkedList<T> {
     public T removeLast() {
         if (tail == null) throw new NoSuchElementException();
         final T element = tail.item;
-        if (head == tail) {
+        final Node<T> prev = tail.prev;
+        tail.item = null;
+        tail.prev = null;
+        tail = prev;
+        if (prev == null) {
             head = null;
-            tail = null;
         } else {
-            Node<T> newTail = getNode(size - 2);
-            tail = newTail;
-            newTail.next = null;
+            prev.next = null;
         }
         size--;
         return element;
@@ -114,21 +126,36 @@ public class CustomLinkedList<T> {
         }
         if (index == 0) return removeFirst();
         if (index == size - 1) return removeLast();
-        Node<T> pred = getNode(index - 1);
-        Node<T> toRemove = pred.next;
+
+        Node<T> toRemove = getNode(index);
         T element = toRemove.item;
-        pred.next = toRemove.next;
+        Node<T> pred = toRemove.prev;
+        Node<T> succ = toRemove.next;
+
+        pred.next = succ;
+        succ.prev = pred;
+
         toRemove.item = null;
         toRemove.next = null;
+        toRemove.prev = null;
+
         size--;
         return element;
     }
 
     private Node<T> getNode(int index) {
-        Node<T> x = head;
-        for (int i = 0; i < index; i++) {
-            x = x.next;
+        if (index < (size >> 1)) {
+            Node<T> x = head;
+            for (int i = 0; i < index; i++) {
+                x = x.next;
+            }
+            return x;
+        } else {
+            Node<T> x = tail;
+            for (int i = size - 1; i > index; i--) {
+                x = x.prev;
+            }
+            return x;
         }
-        return x;
     }
 }
